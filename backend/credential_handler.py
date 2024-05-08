@@ -21,8 +21,7 @@ def request_creds():
         with open("token.json", "w") as token:
             token.write(creds.to_json())
         print(token_id)
-        a = Credentials.from_authorized_user_file("token.json", SCOPES)
-        return creds.to_json()
+        return Credentials.from_authorized_user_file("token.json", SCOPES)
     else:
         print("Credentials not Avalible")
     sys.exit(1)
@@ -34,21 +33,3 @@ def get_creds():
             creds.refresh(Request())
         return creds
     return request_creds()
-
-def decode_google_oauth_token(token):
-    try:
-        # Specify the client ID of your application
-        CLIENT_ID = '592133786316-k0nn6ltbc74c20ojje96nrqbqeebc1sd.apps.googleusercontent.com'
-
-        # Verify the token
-        idinfo = id_token.verify_oauth2_token(token, Request(), CLIENT_ID)
-
-        # Extract user information
-        user_id = idinfo['sub']
-        email = idinfo.get('email')
-
-        return user_id, email
-    except ValueError as e:
-        # Token is invalid
-        print("Invalid token:", e)
-        return None, None
