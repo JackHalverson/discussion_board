@@ -2,17 +2,14 @@ from fastapi import FastAPI, HTTPException
 from sqlmodel import Session, select
 from models import User, Group, Topic, Comment, engine
 
-import credential_handler
+from authlib.integrations.starlette_client import OAuth
+from starlette.config import Config
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.requests import Request
+
 
 app = FastAPI()
 
-
-
-
-@app.post("/login")
-async def login():
-    creds = credential_handler.get_creds()
-    return creds
 
 #User functions
 @app.post("/users/")

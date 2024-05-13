@@ -20,7 +20,6 @@ def request_creds():
         token_id = creds.id_token
         with open("token.json", "w") as token:
             token.write(creds.to_json())
-        print(token_id)
         return Credentials.from_authorized_user_file("token.json", SCOPES)
     else:
         print("Credentials not Avalible")
@@ -33,3 +32,4 @@ def get_creds():
             creds.refresh(Request())
         return creds
     return request_creds()
+
