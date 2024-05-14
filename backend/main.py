@@ -1,14 +1,28 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
 from sqlmodel import Session, select
-from models import User, Group, Topic, Comment, engine
-
-from authlib.integrations.starlette_client import OAuth
-from starlette.config import Config
-from starlette.middleware.sessions import SessionMiddleware
-from starlette.requests import Request
+from sqlalchemy.orm import Session
+import models
+from typing import Annotated
+from database import engine, SessionLocal
+from models import User, Group, Topic, Comment
+import auth
+from auth import get_current_user
 
 
 app = FastAPI()
+app.include_router(auth.router)
+
+models.Base.metadata.create_all(engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 #User functions
@@ -19,25 +33,12 @@ async def create_user(user: User):
         session.commit()
         session.refresh(user)
         return user
-
-@app.get("/users/{user_id}")
-async def read_user(user_id: int):
-    with Session(engine) as session:
-        user = session.get(User, user_id)
-        if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
     
-@app.delete("/users/{user_id}")
-async def delete_user(user_id: int):
-    with Session(engine) as session:
-        user = session.get(User, user_id)
-        if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        session.delete(user)
-        session.commit()
-        return {"message": "User deleted successfully"}
-    
+@app.get("/")
+async def user(user: user_dependency, db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"User": user}
 
 #Group functions
 @app.post("/groups/")
@@ -51,7 +52,7 @@ async def create_group(group: Group):
 @app.get("/groups/")
 async def read_groups():
     with Session(engine) as session:
-        groups = session.exec(select(Group)).all()
+        groups = session.execute(select(Group)).all()
         return groups
     
 @app.delete("/groups/{group_id}")
@@ -77,7 +78,7 @@ async def create_topic(topic: Topic):
 @app.get("/topics/{group_id}/")
 async def read_topics(group_id: int):
     with Session(engine) as session:
-        topics = session.exec(select(Topic).where(Topic.group_id == group_id)).all()
+        topics = session.execute(select(Topic).where(Topic.group_id == group_id)).all()
         return topics
     
 @app.delete("/topics/{topic_id}")
@@ -103,7 +104,7 @@ async def create_comment(comment: Comment):
 @app.get("/comments/{topic_id}/")
 async def read_comments(topic_id: int):
     with Session(engine) as session:
-        comments = session.exec(select(Comment).where(Comment.topic_id == topic_id)).all()
+        comments = session.execute(select(Comment).where(Comment.topic_id == topic_id)).all()
         return comments
     
 @app.delete("/comments/{comment_id}")

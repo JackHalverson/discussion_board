@@ -5,3 +5,7 @@ pydantic
 uvicorn
 sqlmodel
 authlib
+python-multipart
+sqlalchemy
+python-jose[cryptography]
+passlib[bcrypt]

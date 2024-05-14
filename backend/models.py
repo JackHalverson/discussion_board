@@ -1,11 +1,14 @@
 from sqlmodel import Field, SQLModel, create_engine
 from datetime import datetime
+from database import Base
 
 class User(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     email: str
     name: str
-
+    disabled: bool = False
+    hashed_password: str
+    
 class Group(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     name: str
@@ -26,5 +29,3 @@ class Comment(SQLModel, table=True):
     date_posted: datetime
     topic_id: int = Field(foreign_key="topic.id")
     owner_id: int = Field(foreign_key="user.id")
-
-engine = create_engine("postgresql://jacksonhalverson:postgres@localhost/discussion_board", echo=True)
