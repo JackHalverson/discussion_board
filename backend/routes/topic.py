@@ -20,9 +20,15 @@ async def create_topic(topic: Topic):
 @router.get("/{group_id}/")
 async def read_topics(group_id: int):
     with Session(engine) as session:
-        topics = session.execute(select(Topic).where(Topic.group_id == group_id)).all()
+        topics = session.exec(select(Topic).where(Topic.group_id == group_id)).all()
         return topics
     
+@router.get("/{user_id}/")
+async def read_user_topics(user_id: int):
+    with Session(engine) as session:
+        topics = session.exec(select(Topic).where(Topic.owner_id == user_id)).all()
+        return topics
+
 @router.delete("/{topic_id}")
 async def delete_topic(topic_id: int):
     with Session(engine) as session:

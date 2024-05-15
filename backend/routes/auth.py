@@ -18,7 +18,7 @@ router = APIRouter(
 
 SECRET_KEY = "a0f0011fdb6f2b4aa2a70773b9173640ff541d5542940a3f377a78cf4d9afccb"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
@@ -85,6 +85,17 @@ def get_user_name(user_id):
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
         return user.name
+
+async def get_user_id(token: Annotated[str, Depends(oauth2_bearer)]):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: int = payload.get("user_id")
+        if user_id is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+        return user_id
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:

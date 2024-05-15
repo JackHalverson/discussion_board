@@ -3,7 +3,6 @@ from sqlmodel import Session, select
 from database import engine
 from models import Group
 
-
 router = APIRouter(
     prefix="/groups",
     tags=["groups"]
@@ -20,7 +19,13 @@ async def create_group(group: Group):
 @router.get("/")
 async def read_groups():
     with Session(engine) as session:
-        groups = session.execute(select(Group)).all()
+        groups = session.exec(select(Group)).all()
+        return groups
+    
+@router.get("/{user_id}/")
+async def read_user_groups(user_id: int):
+    with Session(engine) as session:
+        groups = session.exec(select(Group).where(Group.owner_id == user_id)).all()
         return groups
     
 @router.delete("/{group_id}")
