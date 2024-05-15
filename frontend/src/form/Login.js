@@ -5,14 +5,14 @@ import axios from "axios";
 export default function Login(props) {
 
     const [loginForm, setLoginform] = useState({
-        email: "",
+        username: "",
         password: "",
     });
 
     const onChangeForm = (label,event) => {
         switch(label) {
             case "email":
-                setLoginform({...loginForm, email: event.target.value});
+                setLoginform({...loginForm, username: event.target.value});
                 break;
             case "password":
                 setLoginform({...loginForm, password: event.target.value});
