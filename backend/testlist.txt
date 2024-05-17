@@ -1,0 +1,3 @@
+auth/create_access_token  -  yes
+auth/get_current_user  -  yes
+auth/get_user_id  -  yes

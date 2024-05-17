@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import queryString from 'query-string';
+import {toast} from 'react-toastify';
 
 export default function Login(props) {
 
@@ -11,7 +13,7 @@ export default function Login(props) {
 
     const onChangeForm = (label,event) => {
         switch(label) {
-            case "email":
+            case "username":
                 setLoginform({...loginForm, username: event.target.value});
                 break;
             case "password":
@@ -20,16 +22,39 @@ export default function Login(props) {
         }
     };
     
-    const onSubmitHandler = async(event)=>{
-        event.preventDefault();
-        console.log(loginForm)
+    const onSubmitHandler = async (event) => {
+    event.preventDefault();
 
-        await axios.post("http://localhost:8000/auth/token", loginForm).then((response)=>{
-            console.log(response);
-        }).catch((error)=>{
-            console.log(error);
-        })
+    const formData = {
+        username: loginForm.username,
+        password: loginForm.password
+    };
+
+    try {
+        const response = await axios.post(
+            "http://localhost:8000/auth/token",
+            queryString.stringify(formData), // Serialize data to x-www-form-urlencoded format
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded' // Set the Content-Type header
+                }
+            }
+        );
+        console.log(response.data);
+        localStorage.setItem("token", response.data.access_token);
+        localStorage.setItem("token_type", response.data.token_type);
+
+        toast.success("Login successful");
+
+        setTimeout(() => {
+            window.location.reload()
+        }, 1000)
+
+    } catch (error) {
+        console.error("Login error:", error.response.data);
+        toast.error(error.response.data.detail);
     }
+};
 
     return (
         <React.Fragment>
@@ -48,7 +73,7 @@ export default function Login(props) {
                     placeholder="Email" 
                     className="block text-sm py-3 px-4 rounded-lg w-full border outline-none focus:ring focus:outline-none focus:ring-yellow-400"
                     onChange={(event)=>{
-                        onChangeForm("email",event);
+                        onChangeForm("username",event);
                     }}>
                     </input>
                     <input 

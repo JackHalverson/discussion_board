@@ -24,13 +24,13 @@ id_dependency = Annotated[int, Depends(get_user_id)]
 
 
 @router.get("/")
-async def user_info(user: user_dependency, db: db_dependency):
+async def user_info(user: user_dependency):
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return {"User": user}
 
 @router.get("/id/")
-def user_id(user_id: id_dependency, db: db_dependency):
+def user_id(user_id: id_dependency):
     if user_id is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user_id
